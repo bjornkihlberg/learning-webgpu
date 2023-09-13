@@ -110,7 +110,8 @@
 
       mainRenderPass.setPipeline(mainPipeline);
       mainRenderPass.setVertexBuffer(0, meshBuffers.vertexBuffer);
-      mainRenderPass.draw(3);
+      mainRenderPass.setIndexBuffer(meshBuffers.indexBuffer, "uint16");
+      mainRenderPass.drawIndexed(6);
 
       mainRenderPass.end();
 
