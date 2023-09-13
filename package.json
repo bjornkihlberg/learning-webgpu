@@ -1,0 +1,10 @@
+{
+  "name": "learning-webgpu",
+  "scripts": {
+    "start": "http-server --port 8000"
+  },
+  "devDependencies": {
+    "@webgpu/types": "^0.1.34",
+    "http-server": "^14.1.1"
+  }
+}
