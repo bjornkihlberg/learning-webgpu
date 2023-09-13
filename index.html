@@ -18,9 +18,46 @@
     <script type="module">
       /** @type {HTMLCanvasElement} */
       const canvas = document.getElementById("target");
-      import { initialization } from "/index.js";
+      import { initialization, createMeshBuffers } from "/index.js";
 
       const [device, context] = await initialization(canvas);
+
+      const encoder = device.createCommandEncoder({
+        label: "main-command-encoder",
+      });
+      const currentTexture = context.getCurrentTexture();
+      const currentTextureView = currentTexture.createView({
+        label: "current-texture-view",
+      });
+      const mainRenderPass = encoder.beginRenderPass({
+        label: "main-render-pass",
+        colorAttachments: [
+          {
+            view: currentTextureView,
+            loadOp: "clear",
+            clearValue: { r: 0.95, g: 0.95, b: 0.95, a: 1 },
+            storeOp: "store",
+          },
+        ],
+      });
+      mainRenderPass.end();
+      device.queue.submit([
+        encoder.finish({
+          label: "main-render-command-buffer",
+        }),
+      ]);
+
+      const vertexData = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
+      const indexData = new Uint16Array([0, 1, 2, 2, 1, 3]);
+
+      const meshBuffers = createMeshBuffers(
+        device,
+        vertexData.byteLength,
+        indexData.byteLength
+      );
+
+      device.queue.writeBuffer(meshBuffers.vertexBuffer, 0, vertexData);
+      device.queue.writeBuffer(meshBuffers.indexBuffer, 0, indexData);
     </script>
   </body>
 </html>
