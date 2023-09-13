@@ -1,6 +1,6 @@
 /** Initialize WebGPU
 @param {HTMLCanvasElement} canvas
-@returns {Promise<[GPUDevice, GPUCanvasContext]>}
+@returns {Promise<[GPUDevice, GPUCanvasContext, GPUTextureFormat]>}
 */
 export async function initialization(canvas) {
   if (!navigator.gpu) throw new Error("WebGPU is not supported on your browser or device.")
@@ -11,7 +11,7 @@ export async function initialization(canvas) {
   const device = await adapter.requestDevice({ label: "main-device" })
   const format = navigator.gpu.getPreferredCanvasFormat();
   context.configure({ device, format });
-  return [device, context]
+  return [device, context, format]
 }
 
 /**
