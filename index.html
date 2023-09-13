@@ -67,7 +67,7 @@
         @vertex
         fn vertexShader(vsIn: VsInput) -> VsOutput {
           var vsOut: VsOutput;
-          vsOut.position = vec4f(vsIn.position, 0, 1);
+          vsOut.position = vec4f(vsIn.position * 0.5, 0, 1);
           return vsOut;
         }
         
@@ -107,7 +107,13 @@
           },
         ],
       });
+
+      mainRenderPass.setPipeline(mainPipeline);
+      mainRenderPass.setVertexBuffer(0, meshBuffers.vertexBuffer);
+      mainRenderPass.draw(3);
+
       mainRenderPass.end();
+
       device.queue.submit([
         encoder.finish({
           label: "main-render-command-buffer",
