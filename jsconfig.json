@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "checkJs": true,
+    "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"]
+  }
+}
