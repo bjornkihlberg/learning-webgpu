@@ -94,6 +94,11 @@
           entryPoint: "fragmentShader",
           targets: [{ format }],
         },
+        primitive: {
+          cullMode: "back",
+          frontFace: "ccw",
+          topology: "triangle-list",
+        },
       });
 
       const mainRenderPass = encoder.beginRenderPass({
