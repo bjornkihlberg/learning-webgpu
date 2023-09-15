@@ -12,13 +12,23 @@
         margin: 0px;
       }
     </style>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/3.4.2/gl-matrix-min.js"
+      referrerpolicy="no-referrer"
+    ></script>
   </head>
   <body>
     <canvas id="target" width="720" height="380"></canvas>
-    <script type="module">
+    <script>
       /** @type {HTMLCanvasElement} */
       const canvas = document.getElementById("target");
-      import { initialization, createMeshBuffers } from "/index.js";
+    </script>
+    <script type="module">
+      import {
+        initialization,
+        createMeshBuffers,
+        createMainPipeline,
+      } from "/index.js";
 
       const [device, context, format] = await initialization(canvas);
 
@@ -44,61 +54,23 @@
 
       const sizeOfFloat32 = 4;
 
-      const vertexBufferLayout = {
-        arrayStride: sizeOfFloat32 * 2,
-        attributes: [
-          {
-            format: "float32x2",
-            offset: 0,
-            shaderLocation: 0,
-          },
-        ],
-      };
-
-      const mainShaderCode = `
-        struct VsInput {
-          @location(0) position: vec2f,
-        };
-
-        struct VsOutput {
-          @builtin(position) position: vec4f,
-        };
-
-        @vertex
-        fn vertexShader(vsIn: VsInput) -> VsOutput {
-          var vsOut: VsOutput;
-          vsOut.position = vec4f(vsIn.position * 0.5, 0, 1);
-          return vsOut;
-        }
-        
-        @fragment
-        fn fragmentShader(vsOut: VsOutput) -> @location(0) vec4f {
-          return vec4f(1, 0, 0, 1);
-        }`;
-
-      const mainShaderModule = device.createShaderModule({
-        label: "main-shader",
-        code: mainShaderCode,
+      const mainUniformBuffer = device.createBuffer({
+        label: "main-uniform-buffer",
+        size: sizeOfFloat32 * 4 * 4,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
 
-      const mainPipeline = device.createRenderPipeline({
-        label: "main-pipeline",
-        layout: "auto",
-        vertex: {
-          module: mainShaderModule,
-          entryPoint: "vertexShader",
-          buffers: [vertexBufferLayout],
-        },
-        fragment: {
-          module: mainShaderModule,
-          entryPoint: "fragmentShader",
-          targets: [{ format }],
-        },
-        primitive: {
-          cullMode: "back",
-          frontFace: "ccw",
-          topology: "triangle-list",
-        },
+      {
+        const cameraBufferData = glMatrix.mat4.create();
+        device.queue.writeBuffer(mainUniformBuffer, 0, cameraBufferData);
+      }
+
+      const mainPipeline = createMainPipeline(device, format);
+
+      const mainBindGroup = device.createBindGroup({
+        label: "main-bind-group",
+        layout: mainPipeline.getBindGroupLayout(0),
+        entries: [{ binding: 0, resource: { buffer: mainUniformBuffer } }],
       });
 
       const mainRenderPass = encoder.beginRenderPass({
@@ -116,6 +88,7 @@
       mainRenderPass.setPipeline(mainPipeline);
       mainRenderPass.setVertexBuffer(0, meshBuffers.vertexBuffer);
       mainRenderPass.setIndexBuffer(meshBuffers.indexBuffer, "uint16");
+      mainRenderPass.setBindGroup(0, mainBindGroup);
       mainRenderPass.drawIndexed(6);
 
       mainRenderPass.end();
