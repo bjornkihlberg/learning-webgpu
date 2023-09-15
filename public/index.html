@@ -12,16 +12,17 @@
         margin: 0px;
       }
     </style>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/3.4.2/gl-matrix-min.js"
-      referrerpolicy="no-referrer"
-    ></script>
   </head>
   <body>
     <canvas id="target" width="720" height="380"></canvas>
     <script>
+      const canvasId = "target";
       /** @type {HTMLCanvasElement} */
-      const canvas = document.getElementById("target");
+      const canvas = document.getElementById(canvasId);
+      if (canvas === null || !(canvas instanceof HTMLCanvasElement))
+        throw new Error(
+          `Could not find a canvas with element id '${canvasId}'.`
+        );
     </script>
     <script type="module">
       import {
@@ -29,6 +30,10 @@
         createMeshBuffers,
         createMainPipeline,
       } from "/index.js";
+      import {
+        vec3,
+        mat4,
+      } from "https://wgpu-matrix.org/dist/2.x/wgpu-matrix.module.js";
 
       const [device, context, format] = await initialization(canvas);
 
@@ -60,8 +65,16 @@
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
 
+      const perspective = mat4.perspective(
+        (80 * Math.PI) / 180,
+        canvas.width / canvas.height,
+        0.1,
+        1000
+      );
+
       {
-        const cameraBufferData = glMatrix.mat4.create();
+        const view = mat4.lookAt([-0.2, -1, 1], [0, 0, 0], [0, 0, 1]);
+        const cameraBufferData = mat4.multiply(perspective, view);
         device.queue.writeBuffer(mainUniformBuffer, 0, cameraBufferData);
       }
 
