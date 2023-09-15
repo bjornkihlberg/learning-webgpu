@@ -1,7 +1,7 @@
 {
   "name": "learning-webgpu",
   "scripts": {
-    "start": "http-server --port 8000"
+    "start": "http-server ./docs --port 8000"
   },
   "devDependencies": {
     "@webgpu/types": "^0.1.34",
