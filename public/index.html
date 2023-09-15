@@ -14,7 +14,9 @@
     </style>
   </head>
   <body>
-    <canvas id="target" width="720" height="380"></canvas>
+    <canvas id="target" width="720" height="380">
+      Your browser does not support HTML5 canvas
+    </canvas>
     <script>
       const canvasId = "target";
       /** @type {HTMLCanvasElement} */
@@ -23,6 +25,15 @@
         throw new Error(
           `Could not find a canvas with element id '${canvasId}'.`
         );
+
+      canvas.onmouseup = () => {
+        if (document.pointerLockElement) document.exitPointerLock();
+      };
+
+      canvas.onmousedown = () => {
+        if (!document.pointerLockElement)
+          canvas.requestPointerLock({ unadjustedMovement: true });
+      };
     </script>
     <script type="module">
       import {
@@ -58,17 +69,52 @@
       });
 
       const perspective = mat4.perspective(
-        (80 * Math.PI) / 180,
+        (90 * Math.PI) / 180,
         canvas.width / canvas.height,
         0.1,
         1000
       );
 
-      {
-        const view = mat4.lookAt([-0.2, -1, 1], [0, 0, 0], [0, 0, 1]);
+      const updateOrbiCamera = (z, x, d) => {
+        const view = mat4.lookAt(
+          [
+            Math.cos(x) * Math.cos(z) * d,
+            Math.cos(x) * Math.sin(z) * d,
+            Math.sin(x) * d,
+          ],
+          [0, 0, 0],
+          [0, 0, 1]
+        );
         const cameraBufferData = mat4.multiply(perspective, view);
         device.queue.writeBuffer(mainUniformBuffer, 0, cameraBufferData);
-      }
+      };
+
+      const orbitSpeed = 0.003;
+      const zoomSpeed = 1.3;
+      let cameraZorbit = 0.3;
+      let cameraElevation = 0.5;
+      let distance = 2;
+
+      canvas.onwheel = (e) => {
+        distance += Math.max(Math.min(e.deltaY, 1), -1);
+        distance = Math.max(Math.min(distance, 20), -5);
+        updateOrbiCamera(cameraZorbit, cameraElevation, zoomSpeed ** distance);
+      };
+
+      document.onmousemove = (e) => {
+        if (document.pointerLockElement) {
+          cameraZorbit -= e.movementX * orbitSpeed;
+          cameraElevation += e.movementY * orbitSpeed;
+          cameraElevation = Math.max(Math.min(cameraElevation, 1.57), -1.57);
+          updateOrbiCamera(
+            cameraZorbit,
+            cameraElevation,
+            zoomSpeed ** distance
+          );
+        }
+      };
+
+      updateOrbiCamera(cameraZorbit, cameraElevation, zoomSpeed ** distance);
 
       const mainPipeline = createMainPipeline(device, format);
 

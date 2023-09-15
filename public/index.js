@@ -57,7 +57,7 @@ export function createMainPipeline(device, format) {
     @vertex
     fn vertexShader(vsIn: VsInput) -> VsOutput {
       var vsOut: VsOutput;
-      vsOut.position = camera * vec4f(vsIn.position * 0.5, -0.2, 1);
+      vsOut.position = camera * vec4f(vsIn.position, 0, 1);
       return vsOut;
     }
 
