@@ -2,7 +2,7 @@
 
 #|
 scheme --program ./interleave-mesh.scm ./square.bin ./docs/square 4 6
-scheme --program ./interleave-mesh.scm ./sphere.bin ./docs/sphere 3840 3840
+scheme --program ./interleave-mesh.scm ./sphere.bin ./docs/sphere 729 3840
 |#
 
 (import (chezscheme))

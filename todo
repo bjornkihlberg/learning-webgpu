@@ -1,6 +1,6 @@
 DOING opaque shader
-  TODO deferred shading
-    TODO textures
+  DOING deferred shading
+    DOING textures
       TODO albedo
       TODO normal
       TODO opacity

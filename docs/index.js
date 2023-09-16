@@ -54,18 +54,22 @@ export function createMainPipeline(device, format) {
 
     struct VsOutput {
       @builtin(position) position: vec4f,
+      @location(0) normal:   vec3f,
+      @location(1) texcoord: vec2f,
     };
 
     @vertex
     fn vertexShader(vsIn: VsInput) -> VsOutput {
       var vsOut: VsOutput;
       vsOut.position = camera * vec4f(vsIn.position, 1);
+      vsOut.normal = vsIn.normal;
+      vsOut.texcoord = vsIn.texcoord;
       return vsOut;
     }
 
     @fragment
     fn fragmentShader(vsOut: VsOutput) -> @location(0) vec4f {
-      return vec4f(1, 0, 0, 1);
+      return vec4f(normalize(vsOut.normal), 1);
     }`
 
   const mainShaderModule = device.createShaderModule({
@@ -133,7 +137,7 @@ export function createMainPipeline(device, format) {
       targets: [{ format }],
     },
     primitive: {
-      // cullMode: "back",
+      cullMode: "back",
       frontFace: "ccw",
       topology: "triangle-list",
     },
