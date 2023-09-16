@@ -47,7 +47,9 @@ export function createMainPipeline(device, format) {
     var<uniform> camera: mat4x4f;
 
     struct VsInput {
-      @location(0) position: vec2f,
+      @location(0) position: vec3f,
+      @location(1) normal:   vec3f,
+      @location(2) texcoord: vec2f,
     };
 
     struct VsOutput {
@@ -57,7 +59,7 @@ export function createMainPipeline(device, format) {
     @vertex
     fn vertexShader(vsIn: VsInput) -> VsOutput {
       var vsOut: VsOutput;
-      vsOut.position = camera * vec4f(vsIn.position, 0, 1);
+      vsOut.position = camera * vec4f(vsIn.position, 1);
       return vsOut;
     }
 
@@ -83,15 +85,32 @@ export function createMainPipeline(device, format) {
 
   /** @type {GPUVertexAttribute} */
   const positionAttribute = {
-    format: "float32x2",
+    format: "float32x3",
     offset: 0,
     shaderLocation: 0,
   }
+  const positionAttributeSize = 3 * sizeOfFloat32
+
+  /** @type {GPUVertexAttribute} */
+  const normalAttribute = {
+    format: "float32x3",
+    offset: positionAttributeSize,
+    shaderLocation: 1,
+  }
+  const normalAttributeSize = 3 * sizeOfFloat32
+
+  /** @type {GPUVertexAttribute} */
+  const texcoordAttribute = {
+    format: "float32x2",
+    offset: positionAttributeSize + normalAttributeSize,
+    shaderLocation: 2,
+  }
+  const texcoordAttributeSize = 2 * sizeOfFloat32
 
   /** @type {GPUVertexBufferLayout} */
   const vertexLayout = {
-    arrayStride: sizeOfFloat32 * 2,
-    attributes: [positionAttribute],
+    arrayStride: positionAttributeSize + normalAttributeSize + texcoordAttributeSize,
+    attributes: [positionAttribute, normalAttribute, texcoordAttribute],
   }
 
   return device.createRenderPipeline({
