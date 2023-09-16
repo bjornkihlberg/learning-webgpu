@@ -1,0 +1,16 @@
+DOING opaque shader
+  TODO deferred shading
+    TODO textures
+      TODO albedo
+      TODO normal
+      TODO opacity
+    TODO AO
+    TODO lights
+TODO stamps
+TODO camera
+  DONE orbit
+  DONE zoom
+  TODO horizontal pan
+  TODO vertical pan
+TODO floor grid
+TODO load mesh
